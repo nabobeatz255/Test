@@ -252,7 +252,9 @@ a:focus {
 
 .instagram-post {
         width: 100%;
-        max-width: 600px;
+        max-width: 500px;
+        border-top: 2px solid #ccc;
+        border-bottom: 2px solid #ccc;
         background-color: #fff;
         -webkit-tap-highlight-color: transparent;
         outline: none;
