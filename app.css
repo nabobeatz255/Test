@@ -279,6 +279,7 @@ a:focus {
     height: 35px;
     margin-right: 8px;
     border-radius: 50%;
+    border: 1px solid #ccc;
 }
 
 .profile-picture .pro {
@@ -357,7 +358,7 @@ a:focus {
 }
 
 .action-item .count {
-  font-size: 14px;
+  font-size: 12px;
   color: #777;
 }
 
