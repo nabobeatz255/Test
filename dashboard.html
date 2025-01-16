@@ -485,6 +485,17 @@ const displayPost = (post, container, isMyPost) => {
     <div class="caption">
       <span class="username">${post.authorName}</span> ${post.content}
     </div>
+    <div class="profile-stats">
+        <div>
+          <h3><i class="ri-heart-line"></i></h3>
+        </div>
+       <div>
+          <h3><i class="ri-share-line"></i></h3>
+        </div>
+         <div>
+          <h3><i class="ri-bookmark-line"></i></h3>
+        </div>
+      </div> 
   `;
 
   container.appendChild(postElement);
@@ -1370,10 +1381,10 @@ Please Wait.....
   <!-- Profile Container -->
  
     <!-- Profile Overview -->
-    <div class="profile-overview" style="margin-bottom:-10px;margin-top:50px">
+    <div class="profile-overview" style="margin-bottom:-10px;margin-top:50px;border: none">
       <!-- Profile Photo -->
       <div class="profile-photo">
-        <img src="blank.png" alt="User Profile Picture" class="profile-picture" style="margin-left:-10px">
+        <img src="blank.png" alt="User Profile Picture" class="profile-picture" style="margin-left:-10px;margin-right: 10px">
       </div>
 <br>
       <!-- Profile Details -->
@@ -1382,14 +1393,6 @@ Please Wait.....
         <p class="user-email">Email Not Registered | <a href="index.html">Jiunge Sasa</a></p>
       </div>
 
-
-      <!--div class="profile-stats">
-        <div>
-          <h3>UID</h3>
-          <p id="user-uid"></p>
-        </div>
-      
-      </div--> 
     </div>
 <br><br>
     <!-- User Posts Section -->
