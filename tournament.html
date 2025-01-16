@@ -49,148 +49,155 @@
     overflow: hidden;
   }
 </style>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-  import { getDatabase, ref, set, update, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
-    authDomain: "register-71bde.firebaseapp.com",
-    databaseURL: "https://register-71bde-default-rtdb.firebaseio.com", // Add your database URL here
-    projectId: "register-71bde",
-    storageBucket: "register-71bde.appspot.com",
-    messagingSenderId: "412548441298",
-    appId: "1:412548441298:web:e0fb2b6c5fbd4af7d0b90b",
-  };
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getDatabase, ref, set, update, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-  const app = initializeApp(firebaseConfig); // Initialize the app first
-  const db = getDatabase(app); // Realtime Database initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
+            authDomain: "register-71bde.firebaseapp.com",
+            databaseURL: "https://register-71bde-default-rtdb.firebaseio.com",
+            projectId: "register-71bde",
+            storageBucket: "register-71bde.appspot.com",
+            messagingSenderId: "412548441298",
+            appId: "1:412548441298:web:e0fb2b6c5fbd4af7d0b90b",
+        };
 
-  const auth = getAuth();
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth();
 
-  const showToast = (message, type = 'info') => {
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 10000);
-  };
+        const showToast = (message, type = 'info') => {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 10000);
+        };
 
-  const displayUserDetails = (user) => {
-    if (user) {
-      const userNameElement = document.querySelector('.user-name');
-      const userEmailElement = document.querySelector('.user-email');
-      const userProfilePicElement = document.querySelector('.profile-pic');
+        const displayUserDetails = (user) => {
+            if (user) {
+                const userNameElement = document.querySelector('.user-name');
+                if (userNameElement) userNameElement.textContent = user.displayName || 'Anonymous';
+            } else {
+                showToast("No user is signed in.", "error");
+            }
+        };
 
-      if (userNameElement) userNameElement.textContent = user.displayName || 'Anonymous';
-      if (userEmailElement) userEmailElement.textContent = user.email || 'No email provided';
-      if (userProfilePicElement) userProfilePicElement.src = user.photoURL || 'default-profile-pic.jpg';
-    } else {
-      showToast("No user is signed in.", "error");
-    }
-  };
+        onAuthStateChanged(auth, (user) => {
+            displayUserDetails(user);
+            if (user) {
+                // Fetch the follow status after the user logs in
+                updateFollowButton(user);
+            }
+        });
 
-  onAuthStateChanged(auth, (user) => {
-    displayUserDetails(user);
-  });
+        // Fetch follower count and update the UI
+        async function updateFollowersCount(profileName) {
+            const profileRef = ref(db, 'profiles/' + profileName + '/followers');
+            const profileSnap = await get(profileRef);
+            const followers = profileSnap.exists() ? profileSnap.val() : [];
+            const followersCount = followers.length;
+            document.querySelector('.post-time').textContent = `${followersCount} Followers`;
+        }
 
-document.querySelectorAll('.like-button').forEach(button => {
-  const postId = button.getAttribute('data-post-id');
+        // Check if the current user follows the profile and update the button
+        async function updateFollowButton(user) {
+            const profileName = document.querySelector('.profile-name').textContent;
+            const userRef = ref(db, 'users/' + user.uid + '/following');
+            const userSnap = await get(userRef);
+            const following = userSnap.exists() ? userSnap.val() : [];
 
-  // First, set the like count when the page is loaded or refreshed
-  const likeCountElement = document.getElementById(`like-count-${postId}`);
-  const postRef = ref(db, 'posts/' + postId);
+            const followButton = document.querySelector('.follow-button');
+            if (following.includes(profileName)) {
+                followButton.classList.remove('follow-button');
+                followButton.classList.add('following-button');
+                followButton.textContent = 'Following';
+            }
+        }
 
-  // Fetch the current like count and set it
-  get(postRef).then((postSnap) => {
-    if (postSnap.exists()) {
-      const postData = postSnap.val();
-      const likesCount = postData.likesCount || 0;
-      likeCountElement.textContent = likesCount;
-      const user = auth.currentUser;
+        async function toggleFollow(button) {
+            const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
+            const user = auth.currentUser;
 
-      if (user && postData.likes && postData.likes[user.uid]) {
-        // If the user already liked, update the button state
-        button.classList.remove('ri-heart-line');
-        button.classList.add('ri-heart-fill');
-      } else {
-        button.classList.remove('ri-heart-fill');
-        button.classList.add('ri-heart-line');
-      }
-    }
-  });
+            if (!user) {
+                showToast('You must be logged in to follow users', 'error');
+                return;
+            }
 
-  // Handle click events for like button
-  button.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    if (!user) {
-      showToast('You must be logged in to like posts', 'error');
-      return;
-    }
+            const userRef = ref(db, 'users/' + user.uid);
+            const profileRef = ref(db, 'profiles/' + profileName);
 
-    const postSnap = await get(postRef);
-    let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
-    const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
+            if (button.classList.contains('follow-button')) {
+                button.classList.remove('follow-button');
+                button.classList.add('following-button');
+                button.textContent = 'Following';
 
-    if (isLiked) {
-      await update(postRef, {
-        likesCount: likesCount - 1,
-        [`likes/${user.uid}`]: null
-      });
-      button.classList.remove('ri-heart-fill');
-      button.classList.add('ri-heart-line');
-      likeCountElement.textContent = likesCount - 1;
-    } else {
-      await update(postRef, {
-        likesCount: likesCount + 1,
-        [`likes/${user.uid}`]: true
-      });
-      button.classList.remove('ri-heart-line');
-      button.classList.add('ri-heart-fill');
-      likeCountElement.textContent = likesCount + 1;
-    }
-  });
-});
+                await update(userRef, {
+                    following: (following) => following ? [...following, profileName] : [profileName]
+                });
+                await update(profileRef, {
+                    followers: (followers) => followers ? [...followers, user.uid] : [user.uid]
+                });
+            } else {
+                button.classList.remove('following-button');
+                button.classList.add('follow-button');
+                button.textContent = 'Follow';
+
+                await update(userRef, {
+                    following: (following) => following.filter(f => f !== profileName)
+                });
+                await update(profileRef, {
+                    followers: (followers) => followers.filter(f => f !== user.uid)
+                });
+            }
+
+            // Update followers count after following/unfollowing
+            updateFollowersCount(profileName);
+        }
+
+        async function toggleLike(button) {
+            const postId = button.getAttribute('data-post-id');
+            const user = auth.currentUser;
+            if (!user) {
+                showToast('You must be logged in to like posts', 'error');
+                return;
+            }
+
+            const postRef = ref(db, 'posts/' + postId);
+            const postSnap = await get(postRef);
+
+            let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
+            const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
+
+            if (isLiked) {
+                await update(postRef, {
+                    likesCount: likesCount - 1,
+                    [`likes/${user.uid}`]: null
+                });
+                button.classList.remove('ri-heart-fill');
+                button.classList.add('ri-heart-line');
+                document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
+            } else {
+                await update(postRef, {
+                    likesCount: likesCount + 1,
+                    [`likes/${user.uid}`]: true
+                });
+                button.classList.remove('ri-heart-line');
+                button.classList.add('ri-heart-fill');
+                document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
+            }
+        }
+
+        // Call this on page load to initialize followers count
+        const profileName = document.querySelector('.profile-name').textContent;
+        updateFollowersCount(profileName);
+
+    </script>
 
 
-  async function toggleFollow(button) {
-    const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
-    const user = auth.currentUser;
-
-    if (!user) {
-      showToast('You must be logged in to follow users', 'error');
-      return;
-    }
-
-    const userRef = ref(db, 'users/' + user.uid);
-    const profileRef = ref(db, 'profiles/' + profileName);
-
-    if (button.classList.contains('follow-button')) {
-      button.classList.remove('follow-button');
-      button.classList.add('following-button');
-      button.textContent = 'Following';
-
-      await update(userRef, {
-        following: (following) => following ? [...following, profileName] : [profileName]
-      });
-      await update(profileRef, {
-        followers: (followers) => followers ? [...followers, user.uid] : [user.uid]
-      });
-    } else {
-      button.classList.remove('following-button');
-      button.classList.add('follow-button');
-      button.textContent = 'Follow';
-
-      await update(userRef, {
-        following: (following) => following.filter(f => f !== profileName)
-      });
-      await update(profileRef, {
-        followers: (followers) => followers.filter(f => f !== user.uid)
-      });
-    }
-  }
-</script>
 
     </head>
     
