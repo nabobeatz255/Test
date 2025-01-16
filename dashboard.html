@@ -485,6 +485,7 @@ const displayPost = (post, container, isMyPost) => {
     <div class="caption">
       <span class="username">${post.authorName}</span> ${post.content}
     </div>
+    <div class="profile-details">
     <div class="profile-stats">
         <div>
           <h3><i class="ri-heart-line"></i></h3>
@@ -496,6 +497,7 @@ const displayPost = (post, container, isMyPost) => {
           <h3><i class="ri-bookmark-line"></i></h3>
         </div>
       </div> 
+      </div>
   `;
 
   container.appendChild(postElement);
