@@ -482,20 +482,23 @@ const displayPost = (post, container, isMyPost) => {
     <div class="post-image toggle-comments">
       <img src="${post.imageUrl}" alt="Post content">
     </div>
-     <div class="caption">
-     <span>${post.authorName}</span>
-     ${post.content}
-    </div>
-      <div class="post-actions">
+
+    <div class="post-actions">
     <div class="actions-left">
       <i class="ri-heart-line"></i>
-      <i class="ri-flag-line"></i>
-      <i class="ri-share-2-line"></i>
+      <span> 6</span>
+      <i class="ri-message-2-line"></i>
+      <span> 6</span>
+      <i class="ri-share-line"></i>
     </div>
     <div class="actions-right">
       <i class="ri-bookmark-line"></i>
     </div>
   </div>
+       <div class="caption">
+     <span class=username>${post.authorName}</span>
+     ${post.content}
+    </div>
  
   `;
 
