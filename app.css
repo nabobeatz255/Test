@@ -343,7 +343,7 @@ a:focus {
   gap: 5px;
   border: 1px solid #ccc;
   border-radius: 6px;
-  padding: 5px;
+  padding: 5px;margin-top: -10px;
 }
 
 .action-item i {
@@ -357,7 +357,7 @@ a:focus {
 }
 
 .action-item .count {
-  font-size: 8px;
+  font-size: 14px;
   color: #777;
 }
 
