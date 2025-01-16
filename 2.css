@@ -1162,12 +1162,11 @@
     line-height: 1.2;
 	font-size: 13px;
 	margin-top: 6px;
-}.instagram-post-2 {
+}
+.instagram-post-2 {
 	width: 100%;
 	max-width: 600px;
-	background-color: #fff;
-	border: 1px solid #e0e0e0;
-	border-radius: 12px;
+	background-color: #fff;	border-radius: 12px;
 	box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 	-webkit-tap-highlight-color: transparent;
 	outline: none;
