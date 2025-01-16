@@ -17,8 +17,7 @@
     <meta name="twitter:image" content="https://nabogaming.com/logo.png">
     <link rel="canonical" href="https://nabogaming.com">
     <link rel="icon" href="logo.png" type="image/x-icon">
-  <!-- PWA Specific -->
-  <link rel="manifest" href="/manifest.json"> <!-- Manifest File -->
+  <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="logo.png" sizes="192x192">
   <link rel="icon" href="logo.png" sizes="512x512">
   
@@ -26,8 +25,17 @@
     <link rel=stylesheet href=app.css>
     <link rel=stylesheet href=2.css>
     <link rel=stylesheet href=remixicon.min.css>
-    <script type="module"> 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+<script type="module"> 
+    function refreshData() {
+  if (currentUser) {
+    loadPosts();
+    loadLikedPosts();
+    loadUserAndTeams();
+  }
+}
+setInterval(refreshData, 30000);
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
   import { getDatabase, ref, push, update, set, onValue, remove, serverTimestamp, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
   import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
@@ -48,8 +56,6 @@
   const storage = getStorage(app);
 
 let currentUser = null;
-
-// Define the list of premium users (add UIDs of premium users manually)
 const premiumUsers = ["Sw9hx2GrwMYPkmzimgOMsTEbKK53"];
 
 onAuthStateChanged(auth, async (user) => {
@@ -73,51 +79,34 @@ onAuthStateChanged(auth, async (user) => {
         window.location.href = "index.html";
     }
 });
-
-// Function to enable premium features
 const enablePremiumFeatures = async () => {
     showToast("Welcome Premium User! Enjoy exclusive features.", "success");
-
-    // Show the premium button for premium users
     const premiumButton = document.getElementById("premium-post-btn");
     if (premiumButton) {
         premiumButton.classList.remove("hidden");
     }
-
-    // Show a specific element only for premium users
     const premiumOnlyElement = document.getElementById("premium-only-element");
     if (premiumOnlyElement) {
         premiumOnlyElement.style.display = 'block';
     }
 };
-
-// Function to enable features for free users
 const enableFreeUserFeatures = async () => {
     showToast("New Version 3.0 Coming 14th February...Get Ready", "info");
-
-    // Show ads for free users
     const freeUserAdsElement = document.getElementById("free-user-ads");
     if (freeUserAdsElement) {
         freeUserAdsElement.style.display = 'block';
     }
-
-    // Hide the premium button for free users
     const premiumButton = document.getElementById("premium-post-btn");
     if (premiumButton) {
         premiumButton.classList.add("hidden");
     }
-
-    // Show a message indicating the current user is premium (for free users)
     const currentUserPremiumMessage = document.getElementById("current-user-premium");
     if (currentUserPremiumMessage) {
         currentUserPremiumMessage.style.display = 'block';
     }
 };
-
-
 document.addEventListener('DOMContentLoaded', () => {
   if (currentUser) {
-    // Fetch current user's team and place them in their selected box
     const userTeamsRef = ref(db, `teams/${currentUser.uid}`);
     get(userTeamsRef).then(snapshot => {
       if (snapshot.exists()) {
@@ -134,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error("Error loading user team:", error);
     });
 
-    // Fetch all teams and display users in their respective boxes
     const allTeamsRef = ref(db, `teams`);
     get(allTeamsRef).then(snapshot => {
       if (snapshot.exists()) {
@@ -143,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const members = teamsData[teamNumber].members;
           const teamBox = document.querySelector(`[data-team="${teamNumber}"]`);
           if (teamBox) {
-            const firstMember = Object.values(members)[0]; // Assuming one user per box
+            const firstMember = Object.values(members)[0];
             if (firstMember) {
               teamBox.querySelector('.plus-box').innerHTML = `<img src="${firstMember.photo}" alt="${firstMember.name}" style="width: 60px; height: 60px; border-radius: 50%;">`;
               teamBox.querySelector('h5').textContent = firstMember.name;
@@ -172,7 +160,7 @@ const handleBoxClick = (box) => {
   const userName = currentUser.displayName || "Anonymous";
   const userPhoto = currentUser.photoURL || "default-profile-pic.jpg";
 
-  // Check if the user has already selected a box
+
   const userTeamsRef = ref(db, `teams/${currentUser.uid}`);
   get(userTeamsRef).then(snapshot => {
     if (snapshot.exists()) {
@@ -185,14 +173,12 @@ const handleBoxClick = (box) => {
           showToast(`Player ${teamNumber} is already taken.`, 'warning');
         } else {
           const teamRef = ref(db, `teams/${teamNumber}/members/${currentUser.uid}`);
-// Inside handleBoxClick function where the player is successfully added
+
 set(teamRef, {
   name: userName,
   photo: userPhoto
 }).then(() => {
   showToast(`Welcome player ${teamNumber}!`, 'success');
-  
-  // Update the box content with photo, name, and player number
 
 box.querySelector('.plus-box').innerHTML = `
   <img src="${userPhoto}" alt="${userName}" style="width: 60px; height: 60px; border-radius: 50%;">
@@ -273,27 +259,17 @@ const updateUserTeam = (userId, teamNumber) => {
 };
 
 
-
-
-
-
-
-  // Toast function to display notifications
   const showToast = (message, type = 'info') => {
     const toast = document.createElement('div');
     toast.classList.add('toast', type);
     toast.textContent = message;
 
-    // Append to the body
     document.body.appendChild(toast);
-
-    // Remove toast after 3 seconds
     setTimeout(() => {
       toast.remove();
     }, 3000);
   };
 
-  // CSS Styles for Toast notifications
   const style = document.createElement('style');
   style.textContent = `
 .toast {
@@ -381,14 +357,14 @@ const updateUserTeam = (userId, teamNumber) => {
     if (months < 12) return `${months}mo ago`;
     return `${years}yr `;
   };
+
+
 const loadPosts = () => {
   const allPostsContainer = document.getElementById("allposts");
   const myPostsContainer = document.getElementById("myposts");
 
-  // Ensure the containers are present
   if (!allPostsContainer || !myPostsContainer) return;
 
-  // Clear the containers before adding new posts
   allPostsContainer.innerHTML = "";
   myPostsContainer.innerHTML = "";
 
@@ -401,25 +377,24 @@ const loadPosts = () => {
       posts.push({ postId, ...post });
     });
 
-    // Sort posts by timestamp from new to old
+
     posts.sort((a, b) => b.timestamp - a.timestamp);
 
-    // Filter posts for my posts and all posts
+
     const myPosts = posts.filter(post => post.authorName === currentUser.displayName);
     const allPosts = posts;
 
-    // Display my posts (with edit/delete options)
+
     myPosts.forEach(post => displayPost(post, myPostsContainer, true));
 
-    // Display all posts (without edit/delete options)
     allPosts.forEach(post => displayPost(post, allPostsContainer, false));
 
-    // Insert random content after all posts are loaded
+
     insertRandomContent();
   });
 };
 
-// Function to randomly place external content
+
 function insertRandomContent() {
   const allPostsContainer = document.getElementById("allposts");
   const randomContent = document.getElementById("myRandomContent"); // External content
@@ -429,17 +404,21 @@ function insertRandomContent() {
     const contentClone = randomContent.cloneNode(true);
     contentClone.style.display = "block"; // Make sure it's visible
 
-    // Insert the cloned content at a random position in the list
+    // Get all child elements of the posts container
     const allPostsChildren = Array.from(allPostsContainer.children);
-    const randomIndex = Math.floor(Math.random() * (allPostsChildren.length + 1));
 
-    if (randomIndex < allPostsChildren.length) {
-      allPostsContainer.insertBefore(contentClone, allPostsChildren[randomIndex]);
+    // Calculate the middle index
+    const middleIndex = Math.floor(allPostsChildren.length / 2);
+
+    // Insert the cloned content at the middle index
+    if (allPostsChildren.length > 0) {
+      allPostsContainer.insertBefore(contentClone, allPostsChildren[middleIndex]);
     } else {
       allPostsContainer.appendChild(contentClone);
     }
   }
 }
+
 
 
   const loadLikedPosts = () => {
@@ -472,7 +451,7 @@ const displayPost = (post, container, isMyPost) => {
   const commentCount = post.comments ? Object.keys(post.comments).length : 0;
 
   const postElement = document.createElement("div");
-  postElement.className = "instagram-post-2";
+  postElement.className = "instagram-post";
   postElement.setAttribute("data-post-id", post.postId);
 
   const shareUrl = `${window.location.origin}/dashboard.html?postId=${post.postId}`;
@@ -1303,6 +1282,31 @@ Please Wait.....
     </ul>
   </nav>
    <div class=post-grid>
+    <div class="instagram-post">
+<div class="post-header">
+  <div class="profile-details">
+    <div class="profile-name">
+Admin 1.0
+    </div>
+    <div class="post-time" data-timestamp="2025-01-05T21:29:59">
+Please Wait.....
+    </div>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>PUBGM</strong></span>
+  </div>
+ <div class="bottom-left-icon">
+    <div id="countdown"></div>
+</div>
+</div>
+<div class="caption">
+  <span class="username">Admin 1.0</span> <span>Pubg Mobile 1v1 Inakujia Hivi Karibuni Uko Tayari?!</span>
+</div>
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
     <div class="instagram-post">
 <div class="post-header">
   <div class="profile-details">
