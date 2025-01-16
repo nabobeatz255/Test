@@ -1,15 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NaboGaming - Exciting Improvements Ahead</title>
-<link rel="stylesheet" href="tourn1.css">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel=stylesheet href=remixicon.min.css>
+<!doctype html>
+<html lang=en>
+  <head>
+    <meta charset=UTF-8> 
+    <meta name=viewport content="width=device-width,initial-scale=1">
+    <meta name="description" content="Nabogaming - Ulimwengu bora wa online games, kushinda zawadi, na kufurahia burudani ya michezo mtandaoni. Jiunge nasi leo!">
+    <meta name="keywords" content="Nabogaming, Michezo, Games Mtandaoni, Zawadi, Michezo ya ushindani, Ushindi, Michezo ya Mtandaoni">
+    <meta name="author" content="Nabogaming">
+    <meta property="og:title" content="Nabogaming">
+    <meta property="og:description" content="Nabogaming furaha ya kushindana michezo ya online na kushinda zawadi kubwa kwenye Nabogaming. Usikose nafasi yako ya ushindi!">
+    <meta property="og:image" content="https://nabogaming.com/1.png">
+    <meta property="og:url" content="https://nabogaming.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nabogaming">
+    <meta name="twitter:description" content="Jiunge na Nabogaming kwa uzoefu bora wa kushindana michezo mtandaoni. Furahia ushindi leo!">
+    <meta name="twitter:image" content="https://nabogaming.com/logo.png">
+    <link rel="canonical" href="https://nabogaming.com">
+    <link rel="icon" href="logo.png" type="image/x-icon">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" href="logo.png" sizes="192x192">
+  <link rel="icon" href="logo.png" sizes="512x512">
+  
+  <title>Nabogaming 2.5</title>
+    <link rel=stylesheet href=app.css>
+    <link rel=stylesheet href=2.css>
+    <link rel=stylesheet href=remixicon.min.css>
+<style>
+  .follow-button {
+    font-size: 14px;
+    border-radius: 6px;
+    padding: 6px 9px;
+    color: white;
+    background-color: #121212;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .following-button {
+    font-size: 14px;
+    border-radius: 6px;
+    padding: 6px 9px;
+    color: #242424;
+    font-weight: bold;
+    background-color: white;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+</style>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+
 
   const firebaseConfig = {
         apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
@@ -19,7 +64,7 @@
     messagingSenderId: "412548441298",
     appId: "1:412548441298:web:e0fb2b6c5fbd4af7d0b90b",
   };
-
+const db = getFirestore(app);
   const app = initializeApp(firebaseConfig);
   const auth = getAuth();
 
@@ -28,7 +73,7 @@
     toast.className = `toast ${type}`;
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 1000);
+    setTimeout(() => toast.remove(), 10000);
   };
 
   const displayUserDetails = (user) => {
@@ -36,7 +81,7 @@
       const userNameElement = document.querySelector('.user-name');
       const userEmailElement = document.querySelector('.user-email');
       const userProfilePicElement = document.querySelector('.profile-pic');
-      
+
       if (userNameElement) userNameElement.textContent = user.displayName || 'Anonymous';
       if (userEmailElement) userEmailElement.textContent = user.email || 'No email provided';
       if (userProfilePicElement) userProfilePicElement.src = user.photoURL || 'default-profile-pic.jpg';
@@ -48,179 +93,351 @@
   onAuthStateChanged(auth, (user) => {
     displayUserDetails(user);
   });
-</script>
+  document.querySelectorAll('.like-button').forEach(button => {
+  button.addEventListener('click', async () => {
+    const postId = button.getAttribute('data-post-id');
+    const user = auth.currentUser;
+    if (!user) {
+      showToast('You must be logged in to like posts', 'error');
+      return;
+    }
+    
+    const postRef = doc(db, 'posts', postId);
+    const userLikeField = `likes.${user.uid}`;
+    const postDoc = await getDoc(postRef);
 
-</head>
+    let likesCount = postDoc.exists() ? postDoc.data().likesCount || 0 : 0;
+    const isLiked = postDoc.exists() && postDoc.data().likes && postDoc.data().likes[user.uid];
+
+    if (isLiked) {
+      await updateDoc(postRef, {
+        likesCount: likesCount - 1,
+        [`likes.${user.uid}`]: false
+      });
+      button.classList.remove('ri-heart-fill');
+      button.classList.add('ri-heart-line');
+      document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
+    } else {
+      await setDoc(postRef, {
+        likesCount: likesCount + 1,
+        [`likes.${user.uid}`]: true
+      }, { merge: true });
+      button.classList.remove('ri-heart-line');
+      button.classList.add('ri-heart-fill');
+      document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
+    }
+  });
+});
+async function toggleFollow(button) {
+  const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
+  const user = auth.currentUser;
+
+  if (!user) {
+    showToast('You must be logged in to follow users', 'error');
+    return;
+  }
+
+  const userRef = doc(db, 'users', user.uid);
+  const profileRef = doc(db, 'profiles', profileName);
+
+  if (button.classList.contains('follow-button')) {
+    button.classList.remove('follow-button');
+    button.classList.add('following-button');
+    button.textContent = 'Following';
+
+    await updateDoc(userRef, {
+      following: arrayUnion(profileName)
+    });
+    await updateDoc(profileRef, {
+      followers: arrayUnion(user.uid)
+    });
+  } else {
+    button.classList.remove('following-button');
+    button.classList.add('follow-button');
+    button.textContent = 'Follow';
+
+    await updateDoc(userRef, {
+      following: arrayRemove(profileName)
+    });
+    await updateDoc(profileRef, {
+      followers: arrayRemove(user.uid)
+    });
+  }
+}
+
+  </script>
+    </head>
+    
 <body>
-    <main>
 
-  <!--div id="preloader">
-        <span id="progress">0%   <p class="preloader"></p></span>
-    </div-->
-        <div>
-        <header class="main-header">
-   <div class="logo-container">
-       <img src="logo.png" alt="NaboGaming Logo" class="logo">
-   </div>
-   <button class="sidebar-toggle" onclick="toggleSidebar()"> <i class="ri-shut-down-line add"></i></button>
-        </header>
+<div class=dashboard  id="app">
+     <nav class="sidebar desktop-sidebar">
+<h2>Dashboard</h2>
+<ul>
+  <li><a onclick='navigateTo("home")'>Home</a></li>
+  <li><a onclick='navigateTo("games")'>Events</a></li>
+  <li><a onclick='navigateTo("shop")'>Shop</a></li>
+  <li><a onclick='navigateTo("policy")'>Sheria</a></li>
+  <li><a onclick='navigateTo("profile")'>Profile</a></li>
 
+</ul>
 
-<div>
-  <h1>Habari <span  class="user-name"></span></h1>
-  <img class="profile-pic" src="default-profile-pic.jpg" alt="Profile Picture">
-</div>
-
-        <div class="user-list">
-   <div class="user-card" style="background-image:url('tournament.png');background-size: 100%;">
-   </div>
-      <div class="user-card" style="background-image:url('tournament.png');background-size: 100%;">
-   </div>
-      <div class="user-card" style="background-image:url('tournament 2.png');background-size: 100%;">
-   </div>
-      <div class="user-card" style="background-image:url('tournament.png');background-size: 100%;">
-   </div>
-      <div class="user-card" style="background-image:url('tournament.png');background-size: 100%;">
-   </div>
-        </div>
-        <div class="cards-section">
-   <div class="card">
-       <div class="card-header">
- <span class="team-name">Team A</span>
- <span class="vs">VS</span>
- <span class="team-name">Team B</span>
-       </div>
-       <div class="card-body">
- <div class="team-logo"></div>
- <div class="team-logo"></div>
-       </div>
-       <div class="match-time">Date: 12 Jan 2025 | Time: 16:00</div>
-   </div>
-
-   <div class="card">
-       <div class="card-header">
- <span class="team-name">Team X</span>
- <span class="vs">VS</span>
- <span class="team-name">Team Y</span>
-       </div>
-       <div class="card-body">
- <div class="team-logo"></div>
- <div class="team-logo"></div>
-       </div>
-       <div class="match-time">Date: 14 Jan 2025 | Time: 18:30</div>
-   </div>
-        </div>
-            <table class="tournament-table">
-   <thead>
-       <tr>
- <th>Position</th>
- <th>Team</th>
- <th>Points</th>
-       </tr>
-   </thead>
-   <tbody>
-       <tr>
- <td>1</td>
- <td>Team A</td>
- <td>25</td>
-       </tr>
-       <tr>
- <td>2</td>
- <td>Team B</td>
- <td>20</td>
-       </tr>
-   </tbody>
-        </table>
-
-                <div class="theme-switcher">
-   <button onclick="setTheme('dark')">Dark</button>
-   <button onclick="setTheme('white')">White</button>
-        </div>
-        </div>
-    </main>
-
-    <div id="popup-overlay" class="popup-overlay">
-        <div id="popup" class="popup">
-   <p>Do you want to go back home or cancel?</p>
-   <div class="button-container">
-       <button class="cancel" onclick="cancelPopup()">Cancel</button>
-       <button class="confirm" onclick="goHome()">Go Home</button>
-   </div>
-        </div>
+    </nav>
+    <div class=main-content>
+        <header class=header>
+    <div class=logo>
+<img src=logo.png alt=Logo>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-   const savedTheme = localStorage.getItem('theme') || 'dark';
-   setTheme(savedTheme);
-        });
+    <div class=icons style="margin-top: -17px">
+<div class="icon-container" style="margin-right:0;border:1px solid #ddd;border-radius:5px;padding: 5px 5px 3px">
+  <i class="ri-notification-line" id="toggleNotify" style="font-size: 20px;"></i>
+  <span class="badger">1</span>
+</div>
 
-        function setTheme(theme) {
-   document.body.className = theme;
-   localStorage.setItem('theme', theme);
-        }
+<!--div style="border:1px solid #ddd;border-radius:5px;margin-top:17px;padding: 5px 5px 3px">
+ <i class=ri-dashboard-line onclick="openmodali()" style="	font-size: 20px;margin-top:17px"></i></div-->
+ <div style="border:1px solid #ddd;border-radius:5px;margin-top:17px;padding: 5px 5px 3px">
+ <i class=ri-rocket-line onclick="openModale()" style="	font-size: 20px;margin-top:17px"></i></div>
+ <div style="margin-top:17px;">
+<i style="color: black;	font-size: 33px;" onclick="openCreateModal()" class="ri-add-circle-fill"></i></div>
+<div style="border:1px solid #ddd;border-radius:5px;margin-top:17px;padding:5px 5px 3px">
+<i class=ri-bookmark-line   onclick='navigateTo("saved")' style="	font-size: 20px;"></i></div>
+    </div>
+  </header>
+    <div class=post-grid>
+    <div class="instagram-post-2">
+<div class="post-header">
+  <div class="profile-details">
+    <div class="profile-name">
+Admin 1.0
+    </div>
+    <div class="post-time" data-timestamp="2025-01-05T21:29:59">
+Please Wait.....
+    </div>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>PUBGM</strong></span>
+  </div>
+ <div class="bottom-left-icon">
+    <div id="countdown"></div>
+</div>
+</div>
+<div class="caption">
+  <span class="username">Admin 1.0</span> <span>Pubg Mobile 1v1 Inakujia Hivi Karibuni Uko Tayari?!</span>
+</div>
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+      <div class="instagram-post-2">
+<div class="post-header">
+  <div class="profile-details">
+    <div class="profile-name">
+Admin 1.0
+    </div>
+    <div class="post-time" style="line-height: 1">
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+  </div>
+</div>
+<div class="post-actions">
+  <div class="actions-left">
+  <div class="action-item">
+  <i class="ri-heart-line like-button" data-post-id="postId1"></i>
+  <span class="count" id="like-count-postId1">2</span>
+</div>
 
-        function toggleSidebar() {
-   document.getElementById('popup-overlay').classList.add('active');
-   document.getElementById('popup').classList.add('active');
-        }
+    <div class="action-item">
+      <i class="ri-message-2-line"></i>
+      <span class="count">3</span>
+    </div>
+  </div>
+  <div class="actions-right">
+    <div class="action-item">
+      <i class="ri-share-line"></i>
+       <span class="count">113k</span>
+    </div>
+  </div>
+</div>
+ </div>
+ 
+ 
+  <div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+20 Followers
+    </div>
 
-        function goHome() {
-   window.location.href = '/';
-        }
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post2.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+   <span>New Version Pubg Mobile</span> 
+</div>
+</div>
 
-        function cancelPopup() {
-   document.getElementById('popup').classList.remove('active');
-   setTimeout(() => {
-       document.getElementById('popup-overlay').classList.remove('active');
-   }, 300);
-        }
-    </script>
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+    <div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+FREEFIRE
+    </div>
+    <div class="post-time">
+203k Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <span>New Version pubg mobile</span> 
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+COD MOBILE
+    </div>
+    <div class="post-time">
+20M Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+20 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+20 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+  </div>
+  </div>
+  </div>
+
+
+
 <script>
-    let progressElement = document.getElementById('progress');
-let progress = 1;
-let interval = 5000 / 97; // Adjust to split the time over 97 steps for pauses
-
-// Generate random pause points between 10% and 90% (three unique points)
-let pausePoints = [];
-while (pausePoints.length < 3) {
-    let point = Math.floor(Math.random() * 81) + 10; // Random between 10 and 90
-    if (!pausePoints.includes(point)) {
-        pausePoints.push(point);
-    }
-}
-pausePoints.sort((a, b) => a - b); // Sort the pause points for smooth progression
-pausePoints.push(95); // Final pause point at 95%
-
-let timer = setInterval(() => {
-    if (progress < 100) {
-        progressElement.textContent = progress + '%';
-        
-        if (pausePoints.includes(progress)) {
-            clearInterval(timer);
-            let delay = progress === 95 ? 2000 : 500; // 2-second delay at 95%, 500ms at other points
-            setTimeout(() => {
-                timer = setInterval(step, interval);
-            }, delay);
-        } else {
-            progress++;
-        }
+  function toggleFollow(button) {
+    if (button.classList.contains('follow-button')) {
+      button.classList.remove('follow-button');
+      button.classList.add('following-button');
+      button.textContent = 'Following';
     } else {
-        clearInterval(timer);
-        document.getElementById('preloader').style.display = 'none';
+      button.classList.remove('following-button');
+      button.classList.add('follow-button');
+      button.textContent = 'Follow';
     }
-}, interval);
-
-function step() {
-    if (progress < 100) {
-        progressElement.textContent = progress + '%';
-        progress++;
-    } else {
-        clearInterval(timer);
-        document.getElementById('preloader').style.display = 'none';
-    }
-}
-
+  }
 </script>
+
 </body>
 </html>
