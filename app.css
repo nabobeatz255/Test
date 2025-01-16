@@ -327,25 +327,37 @@ a:focus {
 }
 
 .post-actions {
-        display: flex;
-        justify-content: space-between;
-        padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
 }
 
 .actions-left, .actions-right {
-        display: flex;
-        gap: 15px;
+  display: flex;
+  gap: 15px;
 }
 
-.actions-left i, .actions-right i {
-        font-size: 24px;
-        color: #555;
-        cursor: pointer;
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
-.actions-left i:hover, .actions-right i:hover {
-        color: #121213;
+.action-item i {
+  font-size: 24px;
+  color: #555;
+  cursor: pointer;
 }
+
+.action-item i:hover {
+  color: #121213;
+}
+
+.action-item .count {
+  font-size: 14px;
+  color: #777;
+}
+
 
 .like-counter {
         padding: 0 15px 10px;
