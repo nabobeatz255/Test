@@ -95,40 +95,64 @@
     displayUserDetails(user);
   });
 
-  document.querySelectorAll('.like-button').forEach(button => {
-    button.addEventListener('click', async () => {
-      const postId = button.getAttribute('data-post-id');
+document.querySelectorAll('.like-button').forEach(button => {
+  const postId = button.getAttribute('data-post-id');
+
+  // First, set the like count when the page is loaded or refreshed
+  const likeCountElement = document.getElementById(`like-count-${postId}`);
+  const postRef = ref(db, 'posts/' + postId);
+
+  // Fetch the current like count and set it
+  get(postRef).then((postSnap) => {
+    if (postSnap.exists()) {
+      const postData = postSnap.val();
+      const likesCount = postData.likesCount || 0;
+      likeCountElement.textContent = likesCount;
       const user = auth.currentUser;
-      if (!user) {
-        showToast('You must be logged in to like posts', 'error');
-        return;
-      }
 
-      const postRef = ref(db, 'posts/' + postId);
-      const postSnap = await get(postRef);
-
-      let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
-      const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
-
-      if (isLiked) {
-        await update(postRef, {
-          likesCount: likesCount - 1,
-          [`likes/${user.uid}`]: null
-        });
-        button.classList.remove('ri-heart-fill');
-        button.classList.add('ri-heart-line');
-        document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
-      } else {
-        await update(postRef, {
-          likesCount: likesCount + 1,
-          [`likes/${user.uid}`]: true
-        });
+      if (user && postData.likes && postData.likes[user.uid]) {
+        // If the user already liked, update the button state
         button.classList.remove('ri-heart-line');
         button.classList.add('ri-heart-fill');
-        document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
+      } else {
+        button.classList.remove('ri-heart-fill');
+        button.classList.add('ri-heart-line');
       }
-    });
+    }
   });
+
+  // Handle click events for like button
+  button.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      showToast('You must be logged in to like posts', 'error');
+      return;
+    }
+
+    const postSnap = await get(postRef);
+    let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
+    const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
+
+    if (isLiked) {
+      await update(postRef, {
+        likesCount: likesCount - 1,
+        [`likes/${user.uid}`]: null
+      });
+      button.classList.remove('ri-heart-fill');
+      button.classList.add('ri-heart-line');
+      likeCountElement.textContent = likesCount - 1;
+    } else {
+      await update(postRef, {
+        likesCount: likesCount + 1,
+        [`likes/${user.uid}`]: true
+      });
+      button.classList.remove('ri-heart-line');
+      button.classList.add('ri-heart-fill');
+      likeCountElement.textContent = likesCount + 1;
+    }
+  });
+});
+
 
   async function toggleFollow(button) {
     const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
