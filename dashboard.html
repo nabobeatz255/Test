@@ -479,12 +479,13 @@ const displayPost = (post, container, isMyPost) => {
                 </div>
               </div>
     </div>
+    <div class="caption">
+     ${post.content}
+    </div>
     <div class="post-image toggle-comments">
       <img src="${post.imageUrl}" alt="Post content">
     </div>
-    <div class="caption">
-      <span class="username">${post.authorName}</span> ${post.content}
-    </div>
+ 
     <div class="profile-details">
     <div class="profile-stats">
         <div>
