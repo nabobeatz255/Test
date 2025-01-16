@@ -21,207 +21,6 @@
     <link rel=stylesheet href=app.css>
     <link rel=stylesheet href=2.css>
     <link rel=stylesheet href=remixicon.min.css>
-
-<style>
-.getNow {
-    padding: 2px;
-}
-/* Modal styles */
-.modale {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(255, 255, 255, 0.9); /* Semi-transparent white background */
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 30px 20px;border-radius: 10px;
-    overflow: auto; /* Allow scrolling if content overflows */
-    -ms-overflow-style: none; /* Hides scrollbar in IE and Edge */
-    scrollbar-width: none; /* Hides scrollbar in Firefox */
-}
-
-.modale::-webkit-scrollbar {
-    display: none; /* Hides scrollbar in Webkit browsers (Chrome, Safari) */
-}
-/* Chat container */
-.chat-container {
-    width: 100%;
-    max-width: 800px;
-    background: #fff;
-    border-radius: 10px;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-    max-height: 80vh; /* Ensure the chat container is scrollable if too tall */
-    overflow-y: auto; /* Allow scrolling inside the chat container */
-}
-
-/* Chat Header */
-.chat-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 15px;
-    margin-bottom: 20px;
-}
-
-.title {
-    font-size: 20px;
-    font-weight: bold;
-    color: #333;
-}
-
-.close {
-    cursor: pointer;
-    font-size: 28px;
-    color: #333;
-}
-
-/* Instagram Post Section */
-.post-container {
-    margin-bottom: 4px;
-}
-
-.post-video {
-    width: 100%;
-    position: relative;
-    background: #eaeaea;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.post-badges {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-}
-
-.post-info {
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    color: #fff;
-    font-size: 14px;
-}
-
-.video-controls {
-    position: absolute;
-    left: 10px;top: 10px;
-}
-
-.play-button {
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 26px;
-    cursor: pointer;
-}
-
-/* Chat Box and Input */
-.chat-box-container {
-    position: sticky;
-    flex-direction: column;
-    margin-top: 0;   margin-bottom: 10px;
-}
-
-.entry {
-    margin-bottom: 25px;
-    font-size: 15px;
-    color: #555;text-align: center;
-}
-
-.chat-box {
-    flex-grow: 1;
-    overflow-y: auto;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    padding: 4px;
-    font-size: 14px;
-    color: #333;
-    max-height: 50vh; /* Allow chat box to scroll if messages are too long */
-}
-
-.chat-input {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px;
-    background: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-#chat-message-input {
-    width: 80%;
-    padding: 10px;
-    background: #fff;
-    color: #333;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 14px;
-}
-
-.send-btn {
-    background-color: #ff0000; /* Red like YouTube's button */
-    color: #fff;
-    border: none;
-    padding: 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.send-btn:hover {
-    background-color: #cc0000;
-}
-.message-header {
-    display: flex;
-}
-        .message {
-            padding: 6px 8px;
-        }
-
-        .message.right {
-            align-self: flex-start;
-        }
-
-        .message.left {
-            align-self: flex-start;
-        }
-
-/* Responsiveness */
-@media screen and (max-width: 768px) {
-    .chat-container {
-        width: 100%;
-        padding: 10px;
-    }
-
-    .post-video {
-        height: auto;
-    }
-
-    .chat-input {
-        flex-direction: column;
-    }
-
-    #chat-message-input {
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    .send-btn {
-        width: 100%;
-    }
-}</style>
-
 <style>
 /* Container Styling */
 .profile-container {
@@ -538,11 +337,8 @@
 }.post-time-2 {
 	font-size: 13px;
 	color: #888;
-	margin-top: 6px;
-}
-.post-time-3 {
-    line-height: 1.2;
 	font-size: 13px;
+	color: #888;
 	margin-top: 6px;
 }.instagram-post-2 {
 	width: 100%;
@@ -553,7 +349,7 @@
 	box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 	-webkit-tap-highlight-color: transparent;
 	outline: none;
-	overflow: hidden;margin-bottom: 6px;
+	overflow: hidden;margin-bottom: 15px;
 }/* Preloader styles */
 .preloader {
   width: 30px;
@@ -582,6 +378,7 @@
 }
 
 </style>
+
 
 
 
@@ -614,7 +411,6 @@
     loadLikedPosts();  // Load liked posts
     displayUserDetails(); // Display user details if available
     displayUniqueId(user.uid);  // Display the unique ID of the user
-    loadMessages();
   } else {
     showToast("You are not signed in. Redirecting to login...", 'error');
     window.location.href = "index.html";
@@ -1066,75 +862,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
   document.getElementById("create-post-button")?.addEventListener("click", createNewPost);
-  
-const loadMessages = () => {
-  const messagesRef = ref(db, "messages");
-  const chatBox = document.getElementById("chat-box");
-
-  // Listen for new messages in real-time
-  onValue(messagesRef, (snapshot) => {
-    const messages = [];
-    snapshot.forEach((childSnapshot) => {
-      const message = childSnapshot.val();
-      messages.push(message);
-    });
-
-    // Clear chat box before displaying new messages
-    chatBox.innerHTML = '';
-
-    // Display all messages
-    messages.forEach(message => {
-      const messageElement = document.createElement('div');
-      messageElement.classList.add('message', message.senderId === currentUser.uid ? 'right' : 'left');
-
-      // Create the profile picture element
-      const profilePicture = message.senderPhotoURL || 'default-profile-picture.jpg'; // Use a default picture if none is available
-
-      messageElement.innerHTML = `
-      
-       <div class="post-header getNow">
-      <div class="profile-picture">
-        <img src="${profilePicture}" alt="${message.senderName}'s profile picture" >
-      </div>
-      <div class="profile-details">
-        <div class="profile-name">${message.senderName}</div>
-        <div class="post-time-3">${message.text}</span></div> 
-      </div>
-    </div>
-      `;
-      chatBox.appendChild(messageElement);
-    });
-
-    // Scroll to the bottom to show the latest message
-    chatBox.scrollTop = chatBox.scrollHeight;
-  });
-};
-const sendMessage = async () => {
-  const messageInput = document.getElementById("chat-message-input");
-  const messageText = messageInput.value.trim();
-
-  if (!messageText) {
-    showToast("Please enter a message.", 'warning');
-    return;
-  }
-
-  const messagesRef = ref(db, "messages");
-  const newMessageRef = push(messagesRef);
-  await set(newMessageRef, {
-    senderId: currentUser.uid,
-    senderName: currentUser.displayName || "Anonymous",
-    senderPhotoURL: currentUser.photoURL || 'default-profile-picture.jpg', // Include photoURL here
-    text: messageText,
-    timestamp: serverTimestamp(),
-  });
-
-  // Clear the input field after sending the message
-  messageInput.value = '';
-  showToast("Message sent!", 'success');
-};
-document.getElementById('send-message-button')?.addEventListener('click', sendMessage);
 </script>
-
 
 
 
@@ -1158,13 +886,12 @@ document.getElementById('send-message-button')?.addEventListener('click', sendMe
     <div class=logo>
 <img src=logo.png alt=Logo>
     </div>
-   <!--div class="search-bar">
+   <div class="search-bar">
  <input type="text" id="search-input" placeholder="Search Events..." oninput="showSuggestions()">
     <div id="suggestions-list"></div>
-</div-->
+</div>
     <div class=icons>
 <i class=ri-notification-line  id="toggleNotify" style="	font-size: 20px;"></i>
- <i class=ri-rocket-line onclick="openModale()" style="	font-size: 20px;"></i>
 <i style="color: black;	font-size: 33px;" onclick="openCreateModal()" class="ri-add-circle-fill"></i>
 <i class=ri-heart-line   onclick='navigateTo("saved")' style="	font-size: 20px;"></i>
     </div>
@@ -1565,8 +1292,7 @@ Please Wait.....
     </div>
 </div>
       <br>
- <h3 style="text-align: center">Posts Zangu (<span class="user-name"> No data </span>'s Post)</h3>
-<br>
+ <h3 style="text-align: center">Posts Zangu (<span class="user-name"> No data </span>'s Post)</h3><br>
  <div id="myposts" class="post-grid"><div class="preloader"></div>
   </div>
 </div></section>
@@ -1577,7 +1303,7 @@ Please Wait.....
   </header>
   <br><br><br>
   <div class="post-grid" id="likedposts">
-     <img src="notfound.png" height="580" width="350">
+      
   </div>
 
 </div>
@@ -1587,6 +1313,7 @@ Please Wait.....
 <div class="hidden" id="notifyPopup">
   <div class="header-2">
     <div class="logo">
+<i class="ri-notification-fill"></i>
     </div>
     <div class="title-center">
 <h2>Notifications</h2>
@@ -1635,89 +1362,9 @@ Please Wait.....
 </div>
     </div>
   </div>
-  <!-- Modal for Group Chat -->
 
-  <div id="chatModal" class="modale">
-    <div class="chat-container" id="chat-container">
-      <!-- Chat Header -->
-      <div class="chat-header">
-        <span class="title">Game-On</span>
-        <i class="ri-close-line close" onclick="closeModale()"></i>
-      </div>
-      
-      <!-- Instagram Post Section -->
-      <div class="post-container">
-        <div class="post-video">
-          <video id="post-video" src="1.mp4" width="100%" height="auto" preload="metadata">
-            Your browser does not support the video tag.
-          </video>
 
-          <!-- Post Badges -->
-          <div class="post-badges">
-            <span class="badge new">
-              <div class="post-options">
-                <i class="ri-more-fill"></i>
-                <div class="options-menu">
-                  <ul style="border-color:#ddd; background:#121212">
-                    <li style="color:white;">Call Seller</li>
-                    <li style="color:white;">Report Seller</li>
-                  </ul>
-                </div>
-              </div>
-            </span>
-          </div>
-
-          <!-- Post Info -->
-          <div class="post-info">
-            <span>Werenoi - Location</span>
-          </div>
-
-          <!-- Video Controls -->
-          <div class="video-controls">
-            <button id="play-pause" class="play-button ri-play-fill"></button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Chat Box and Input -->
-      <div class="chat-box-container">
-        <span class="entry">
-          Karibu Katika ChatPlace By Nabogaming, Chati Na Gamers Mbalimbali Ndani Ya Nabogaming. Tukutakie Chatting Njema
-        </span>
-
-        <div class="chat-box" id="chat-box">
-         <div class="preloader"></div>
-        </div>
-
-        <div class="chat-input">
-          <input type="text" id="chat-message-input" placeholder="Type a message..." />
-          <button id="send-message-button" class="send-btn">Send</button>
-        </div>
-      </div>
     </div>
-  </div>
-
-  
-    </div>
-      <script>
-    // Function to open the modal
-    function openModale() {
-        document.getElementById('chatModal').style.display = 'flex';
-    }
-
-    // Function to close the modal when clicked outside
-    window.onclick = function(event) {
-        var modal = document.getElementById('chatModal');
-        if (event.target === modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    // Optional: Function to close the modal using a close button inside the modal
-    function closeModale() {
-        document.getElementById('chatModal').style.display = 'none';
-    }
-</script>
     <script>
 // Function to navigate to a specific section
 function navigateTo(pageId) {
@@ -1991,50 +1638,6 @@ window.onclick = function(event) {
 
 // Call the function to start the countdown
 startCountdown();
-  </script>
-  <script>
-const video = document.getElementById('post-video');
-const playPauseButton = document.getElementById('play-pause');
-const progressBar = document.getElementById('progress-bar');
-
-// Toggle play/pause
-playPauseButton.addEventListener('click', () => {
-  if (video.paused) {
-    video.play();
-    playPauseButton.classList.remove('ri-play-fill');
-    playPauseButton.classList.add('ri-pause-fill');
-  } else {
-    video.pause();
-    playPauseButton.classList.remove('ri-pause-fill');
-    playPauseButton.classList.add('ri-play-fill');
-  }
-});
-
-
-// Create a canvas element to capture the first frame
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-
-// When the video metadata is loaded, capture the first frame
-video.addEventListener('loadedmetadata', () => {
-  // Set canvas size to video dimensions
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-
-  // Draw the first frame of the video onto the canvas
-  video.currentTime = 0; // Set the video time to 0 to capture the first frame
-
-  // Once the video has loaded the first frame, draw it to the canvas
-  video.addEventListener('seeked', () => {
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert the canvas to a data URL (base64 image)
-    const posterImage = canvas.toDataURL();
-
-    // Set the 'poster' attribute of the video element to the image
-    video.setAttribute('poster', posterImage);
-  });
-});
   </script>
   </body>
 </html>
