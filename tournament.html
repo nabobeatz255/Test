@@ -49,7 +49,124 @@
     overflow: hidden;
   }
 </style>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+  import { getDatabase, ref, set, update, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
+    authDomain: "register-71bde.firebaseapp.com",
+    databaseURL: "https://register-71bde-default-rtdb.firebaseio.com", // Add your database URL here
+    projectId: "register-71bde",
+    storageBucket: "register-71bde.appspot.com",
+    messagingSenderId: "412548441298",
+    appId: "1:412548441298:web:e0fb2b6c5fbd4af7d0b90b",
+  };
+
+  const app = initializeApp(firebaseConfig); // Initialize the app first
+  const db = getDatabase(app); // Realtime Database initialization
+
+  const auth = getAuth();
+
+  const showToast = (message, type = 'info') => {
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 10000);
+  };
+
+  const displayUserDetails = (user) => {
+    if (user) {
+      const userNameElement = document.querySelector('.user-name');
+      const userEmailElement = document.querySelector('.user-email');
+      const userProfilePicElement = document.querySelector('.profile-pic');
+
+      if (userNameElement) userNameElement.textContent = user.displayName || 'Anonymous';
+      if (userEmailElement) userEmailElement.textContent = user.email || 'No email provided';
+      if (userProfilePicElement) userProfilePicElement.src = user.photoURL || 'default-profile-pic.jpg';
+    } else {
+      showToast("No user is signed in.", "error");
+    }
+  };
+
+  onAuthStateChanged(auth, (user) => {
+    displayUserDetails(user);
+  });
+
+  document.querySelectorAll('.like-button').forEach(button => {
+    button.addEventListener('click', async () => {
+      const postId = button.getAttribute('data-post-id');
+      const user = auth.currentUser;
+      if (!user) {
+        showToast('You must be logged in to like posts', 'error');
+        return;
+      }
+
+      const postRef = ref(db, 'posts/' + postId);
+      const postSnap = await get(postRef);
+
+      let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
+      const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
+
+      if (isLiked) {
+        await update(postRef, {
+          likesCount: likesCount - 1,
+          [`likes/${user.uid}`]: null
+        });
+        button.classList.remove('ri-heart-fill');
+        button.classList.add('ri-heart-line');
+        document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
+      } else {
+        await update(postRef, {
+          likesCount: likesCount + 1,
+          [`likes/${user.uid}`]: true
+        });
+        button.classList.remove('ri-heart-line');
+        button.classList.add('ri-heart-fill');
+        document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
+      }
+    });
+  });
+
+  async function toggleFollow(button) {
+    const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
+    const user = auth.currentUser;
+
+    if (!user) {
+      showToast('You must be logged in to follow users', 'error');
+      return;
+    }
+
+    const userRef = ref(db, 'users/' + user.uid);
+    const profileRef = ref(db, 'profiles/' + profileName);
+
+    if (button.classList.contains('follow-button')) {
+      button.classList.remove('follow-button');
+      button.classList.add('following-button');
+      button.textContent = 'Following';
+
+      await update(userRef, {
+        following: (following) => following ? [...following, profileName] : [profileName]
+      });
+      await update(profileRef, {
+        followers: (followers) => followers ? [...followers, user.uid] : [user.uid]
+      });
+    } else {
+      button.classList.remove('following-button');
+      button.classList.add('follow-button');
+      button.textContent = 'Follow';
+
+      await update(userRef, {
+        following: (following) => following.filter(f => f !== profileName)
+      });
+      await update(profileRef, {
+        followers: (followers) => followers.filter(f => f !== user.uid)
+      });
+    }
+  }
+</script>
 
     </head>
     
