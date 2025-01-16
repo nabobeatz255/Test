@@ -463,15 +463,13 @@ const displayPost = (post, container, isMyPost) => {
       </div>
       <div class="profile-details">
         <div class="profile-name">${post.authorName}</div>
-        <div class="post-time-2">${formatTimestamp(post.timestamp)} • <span class="like-count">${Object.keys(post.likes || {}).length} likes</span></div>
+        <div class="post-time-2">${formatTimestamp(post.timestamp)} • <span class="like-count"> Public</span></div>
       </div>
         <div class="post-options">
                 <i class="ri-more-fill"></i>
                 <div class="options-menu">
                   <ul>
                   ${isMyPost ? `<li class="edit-btn" data-id="${post.postId}">Edit The Post</li>` : ""}
-                  <li class="toggle-comments" data-id="${post.postId}">View Post</li>
-  <li class="like-btn" data-id="${post.postId}">Like ${post.authorName}'s Post</li>
                 <li class="share-btn" data-id="${post.postId}" data-url="${shareUrl}">Share ${post.authorName}'s Post</li>
                   <li><span class="comment-count">Current comments ${commentCount}</span></li>
                     ${isMyPost ? `<li class="delete-post-btn" data-id="${post.postId}">Delete My Post</li>` : ""}
@@ -488,7 +486,7 @@ const displayPost = (post, container, isMyPost) => {
     </div>
 <div class="post-actions">
   <div class="actions-left">
-    <div class="action-item" data-id="${post.postId}">
+    <div class="action-item like-btn" data-id="${post.postId}">
       <i class="ri-heart-line"></i>
       <span class="count">${Object.keys(post.likes || {}).length}</span>
     </div>
