@@ -471,8 +471,6 @@ const displayPost = (post, container, isMyPost) => {
                   <ul>
                   ${isMyPost ? `<li class="edit-btn" data-id="${post.postId}">Edit The Post</li>` : ""}
                   <li class="toggle-comments" data-id="${post.postId}">View Post</li>
-                <li class="share-btn" data-id="${post.postId}" data-url="${shareUrl}">Share ${post.authorName}'s Post</li>
-                  <li><span class="comment-count">Current comments ${commentCount}</span></li>
                     ${isMyPost ? `<li class="delete-post-btn" data-id="${post.postId}">Delete My Post</li>` : ""}
                   </ul>
                 </div>
@@ -497,7 +495,7 @@ const displayPost = (post, container, isMyPost) => {
     </div>
   </div>
   <div class="actions-right">
-    <div class="action-item" data-id="${post.postId}" data-url="${shareUrl}">
+    <div class="action-item share-btn" data-id="${post.postId}" data-url="${shareUrl}">
       <i class="ri-share-line"></i>
     </div>
   </div>
