@@ -52,11 +52,12 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
   import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-  import { getFirestore, doc, setDoc, updateDoc, arrayUnion, arrayRemove, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+  import { getDatabase, ref, set, update, get, child, remove } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
     authDomain: "register-71bde.firebaseapp.com",
+    databaseURL: "https://register-71bde-default-rtdb.firebaseio.com", // Add your database URL here
     projectId: "register-71bde",
     storageBucket: "register-71bde.appspot.com",
     messagingSenderId: "412548441298",
@@ -64,7 +65,7 @@
   };
 
   const app = initializeApp(firebaseConfig); // Initialize the app first
-  const db = getFirestore(app); // Now it's safe to use 'app' for Firestore
+  const db = getDatabase(app); // Realtime Database initialization
 
   const auth = getAuth();
 
@@ -102,27 +103,26 @@
         showToast('You must be logged in to like posts', 'error');
         return;
       }
-      
-      const postRef = doc(db, 'posts', postId);
-      const userLikeField = `likes.${user.uid}`;
-      const postDoc = await getDoc(postRef);
 
-      let likesCount = postDoc.exists() ? postDoc.data().likesCount || 0 : 0;
-      const isLiked = postDoc.exists() && postDoc.data().likes && postDoc.data().likes[user.uid];
+      const postRef = ref(db, 'posts/' + postId);
+      const postSnap = await get(postRef);
+
+      let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
+      const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
 
       if (isLiked) {
-        await updateDoc(postRef, {
+        await update(postRef, {
           likesCount: likesCount - 1,
-          [`likes.${user.uid}`]: false
+          [`likes/${user.uid}`]: null
         });
         button.classList.remove('ri-heart-fill');
         button.classList.add('ri-heart-line');
         document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
       } else {
-        await setDoc(postRef, {
+        await update(postRef, {
           likesCount: likesCount + 1,
-          [`likes.${user.uid}`]: true
-        }, { merge: true });
+          [`likes/${user.uid}`]: true
+        });
         button.classList.remove('ri-heart-line');
         button.classList.add('ri-heart-fill');
         document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
@@ -139,30 +139,30 @@
       return;
     }
 
-    const userRef = doc(db, 'users', user.uid);
-    const profileRef = doc(db, 'profiles', profileName);
+    const userRef = ref(db, 'users/' + user.uid);
+    const profileRef = ref(db, 'profiles/' + profileName);
 
     if (button.classList.contains('follow-button')) {
       button.classList.remove('follow-button');
       button.classList.add('following-button');
       button.textContent = 'Following';
 
-      await updateDoc(userRef, {
-        following: arrayUnion(profileName)
+      await update(userRef, {
+        following: (following) => following ? [...following, profileName] : [profileName]
       });
-      await updateDoc(profileRef, {
-        followers: arrayUnion(user.uid)
+      await update(profileRef, {
+        followers: (followers) => followers ? [...followers, user.uid] : [user.uid]
       });
     } else {
       button.classList.remove('following-button');
       button.classList.add('follow-button');
       button.textContent = 'Follow';
 
-      await updateDoc(userRef, {
-        following: arrayRemove(profileName)
+      await update(userRef, {
+        following: (following) => following.filter(f => f !== profileName)
       });
-      await updateDoc(profileRef, {
-        followers: arrayRemove(user.uid)
+      await update(profileRef, {
+        followers: (followers) => followers.filter(f => f !== user.uid)
       });
     }
   }
