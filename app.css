@@ -341,6 +341,9 @@ a:focus {
   display: flex;
   align-items: center;
   gap: 5px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 5px;
 }
 
 .action-item i {
