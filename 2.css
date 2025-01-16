@@ -386,7 +386,9 @@
 
 .comments-popup-content {
   position: relative;
-  overflow: auto;
+  overflow: auto;background: #121212;
+  animation: fadein .8s ease-in-out;
+  color: white;
 }
 
 .comments-popup .close-popup {
