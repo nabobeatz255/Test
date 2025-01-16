@@ -451,7 +451,7 @@ const displayPost = (post, container, isMyPost) => {
   const commentCount = post.comments ? Object.keys(post.comments).length : 0;
 
   const postElement = document.createElement("div");
-  postElement.className = "instagram-post";
+  postElement.className = "instagram-post-2";
   postElement.setAttribute("data-post-id", post.postId);
 
   const shareUrl = `${window.location.origin}/dashboard.html?postId=${post.postId}`;
