@@ -1166,6 +1166,8 @@
 .instagram-post-2 {
 	width: 100%;
 	max-width: 600px;
+	border: 1px solid #ccc;
+	border-radius: 10px;
 	background-color: #fff;	border-radius: 12px;
 	-webkit-tap-highlight-color: transparent;
 	outline: none;
