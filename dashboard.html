@@ -488,19 +488,18 @@ const displayPost = (post, container, isMyPost) => {
     </div>
 <div class="post-actions">
   <div class="actions-left">
-    <div class="action-item">
+    <div class="action-item" data-id="${post.postId}">
       <i class="ri-heart-line"></i>
-      <span class="count">123</span>
+      <span class="count">${Object.keys(post.likes || {}).length}</span>
     </div>
-    <div class="action-item">
-      <i class="ri-message-3-line"></i>
-      <span class="count">45</span>
+    <div class="action-item toggle-comments" data-id="${post.postId}">
+      <i class="ri-message-2-line"></i>
+      <span class="count">${commentCount}</span>
     </div>
   </div>
   <div class="actions-right">
-    <div class="action-item">
+    <div class="action-item" data-id="${post.postId}" data-url="${shareUrl}">
       <i class="ri-share-line"></i>
-      <span class="count">10</span>
     </div>
   </div>
 </div>
