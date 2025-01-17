@@ -26,6 +26,181 @@
     <link rel=stylesheet href=2.css>
     <link rel=stylesheet href=remixicon.min.css>
 <style>
+    .popup {
+         outline: none;
+    -webkit-tap-highlight-color: transparent;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.8);
+        color: white;
+        z-index: 1000;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+    .popup.show {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .popup-content {
+        width: 100vw;
+        height: 100vh;
+        background: #fff;
+        padding: 10px;overflow-x: hidden;
+        border-radius: 8px 8px 0 0;
+        overflow-y: auto; /* Enable vertical scrolling */
+    }
+    .close-btn {
+        margin-top: 15px;
+        padding: 5px;
+        z-index: 999999;
+        background: white;
+        font-size: 17px;
+        color: red;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        cursor: pointer;
+    }
+.getlogo {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    margin-bottom: 10px;
+    padding:6px 5px 1px;
+    align-items: center;
+    justify-content: center;
+}
+.getlogo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #ccc;
+}
+
+</style>
+<style>
+  .battle-card {
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 20px;
+    width: 100%;color:black;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: #fff;
+    position: relative;
+  }
+
+  .team {
+    text-align: center;
+    cursor: pointer;
+  }
+
+  .team img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .team-name {
+    margin: 8px 0;
+    font-weight: bold;
+    font-size: 16px;
+  }
+
+  .vs {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ccc;
+    margin: 0 15px;
+  }
+
+  .timer {
+    text-align: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+
+  .timer .countdown {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 15px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 30px;
+    background-color: #3aafa9;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  }
+
+  .btn:hover {
+    background-color: #329e96;
+    transform: scale(1.05);
+  }
+
+  .watch-btn {
+    text-align: center;
+  }
+
+ .popupi {
+    display: none;
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    width: 300px;height: auto;
+    transform: translateX(-50%);
+    padding: 9px 6px 0 0;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 10;
+    text-align: left;
+    backdrop-filter: blur(4px);
+}
+
+.popupi.active {
+    display: block;
+}
+.battle-card, .popupi, .popupi-close-btn {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.popupi-close-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;padding: 0 2px;
+    text-align: right;border-radius: 50%;
+    margin:10px 10px 6px;
+  
+
+}
+
+
+</style>
+<style>
   .follow-button {
     font-size: 14px;
     border-radius: 6px;
@@ -49,155 +224,6 @@
     overflow: hidden;
   }
 </style>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-        import { getDatabase, ref, set, update, get, child } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyC_VKdV-KsIzUiOb7jFLsYXdTsuGkLiS-Q",
-            authDomain: "register-71bde.firebaseapp.com",
-            databaseURL: "https://register-71bde-default-rtdb.firebaseio.com",
-            projectId: "register-71bde",
-            storageBucket: "register-71bde.appspot.com",
-            messagingSenderId: "412548441298",
-            appId: "1:412548441298:web:e0fb2b6c5fbd4af7d0b90b",
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth();
-
-        const showToast = (message, type = 'info') => {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 10000);
-        };
-
-        const displayUserDetails = (user) => {
-            if (user) {
-                const userNameElement = document.querySelector('.user-name');
-                if (userNameElement) userNameElement.textContent = user.displayName || 'Anonymous';
-            } else {
-                showToast("No user is signed in.", "error");
-            }
-        };
-
-        onAuthStateChanged(auth, (user) => {
-            displayUserDetails(user);
-            if (user) {
-                // Fetch the follow status after the user logs in
-                updateFollowButton(user);
-            }
-        });
-
-        // Fetch follower count and update the UI
-        async function updateFollowersCount(profileName) {
-            const profileRef = ref(db, 'profiles/' + profileName + '/followers');
-            const profileSnap = await get(profileRef);
-            const followers = profileSnap.exists() ? profileSnap.val() : [];
-            const followersCount = followers.length;
-            document.querySelector('.post-time').textContent = `${followersCount} Followers`;
-        }
-
-        // Check if the current user follows the profile and update the button
-        async function updateFollowButton(user) {
-            const profileName = document.querySelector('.profile-name').textContent;
-            const userRef = ref(db, 'users/' + user.uid + '/following');
-            const userSnap = await get(userRef);
-            const following = userSnap.exists() ? userSnap.val() : [];
-
-            const followButton = document.querySelector('.follow-button');
-            if (following.includes(profileName)) {
-                followButton.classList.remove('follow-button');
-                followButton.classList.add('following-button');
-                followButton.textContent = 'Following';
-            }
-        }
-
-        async function toggleFollow(button) {
-            const profileName = button.closest('.post-header').querySelector('.profile-name').textContent;
-            const user = auth.currentUser;
-
-            if (!user) {
-                showToast('You must be logged in to follow users', 'error');
-                return;
-            }
-
-            const userRef = ref(db, 'users/' + user.uid);
-            const profileRef = ref(db, 'profiles/' + profileName);
-
-            if (button.classList.contains('follow-button')) {
-                button.classList.remove('follow-button');
-                button.classList.add('following-button');
-                button.textContent = 'Following';
-
-                await update(userRef, {
-                    following: (following) => following ? [...following, profileName] : [profileName]
-                });
-                await update(profileRef, {
-                    followers: (followers) => followers ? [...followers, user.uid] : [user.uid]
-                });
-            } else {
-                button.classList.remove('following-button');
-                button.classList.add('follow-button');
-                button.textContent = 'Follow';
-
-                await update(userRef, {
-                    following: (following) => following.filter(f => f !== profileName)
-                });
-                await update(profileRef, {
-                    followers: (followers) => followers.filter(f => f !== user.uid)
-                });
-            }
-
-            // Update followers count after following/unfollowing
-            updateFollowersCount(profileName);
-        }
-
-        async function toggleLike(button) {
-            const postId = button.getAttribute('data-post-id');
-            const user = auth.currentUser;
-            if (!user) {
-                showToast('You must be logged in to like posts', 'error');
-                return;
-            }
-
-            const postRef = ref(db, 'posts/' + postId);
-            const postSnap = await get(postRef);
-
-            let likesCount = postSnap.exists() ? postSnap.val().likesCount || 0 : 0;
-            const isLiked = postSnap.exists() && postSnap.val().likes && postSnap.val().likes[user.uid];
-
-            if (isLiked) {
-                await update(postRef, {
-                    likesCount: likesCount - 1,
-                    [`likes/${user.uid}`]: null
-                });
-                button.classList.remove('ri-heart-fill');
-                button.classList.add('ri-heart-line');
-                document.getElementById(`like-count-${postId}`).textContent = likesCount - 1;
-            } else {
-                await update(postRef, {
-                    likesCount: likesCount + 1,
-                    [`likes/${user.uid}`]: true
-                });
-                button.classList.remove('ri-heart-line');
-                button.classList.add('ri-heart-fill');
-                document.getElementById(`like-count-${postId}`).textContent = likesCount + 1;
-            }
-        }
-
-        // Call this on page load to initialize followers count
-        const profileName = document.querySelector('.profile-name').textContent;
-        updateFollowersCount(profileName);
-
-    </script>
-
-
 
     </head>
     
@@ -313,7 +339,7 @@ PUBGM
   </div>
   <div class="post-options">
 <span class="follow-button" onclick="toggleFollow(this)">Follow</span>
-<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white" onclick="togglePopup('popup1')">Visit Now</span>
   </div>
 </div>
 <div class="post-image">
@@ -455,9 +481,348 @@ PUBGM
   </div>
   </div>
   </div>
+  
+    <div id="popup1" class="popup">
+        <div class="popup-content">
+               <header class=header style="margin-top: 0px;background:transparent">
+    <div class="getlogo">
+<img src=5.png alt=Logo>
+<img src=5.png alt=Logo style="margin-left: -15px">
+<img src=5.png alt=Logo style="margin-left: -15px">
+    </div>
+  </header>
+              <div class=post-grid>
+    <div class="instagram-post-2" style="border: none">
+<div class="post-header">
+  <div class="profile-details">
+    <div class="profile-name" style="font-size: 19px">
+WELCOME TO PUBG MOBILE
+    </div>
+    <div class="post-time" style="line-height: 1.2">
+PUBG Mobile ni toleo la mchezo maarufu wa vita mtandaoni lenye michoro ya hali ya juu na uwanja mkubwa wa wachezaji hadi 100 wakipambana kuwa mchezaji wa mwisho kusalia hai. PUBG Lite ni toleo jepesi lenye mahitaji madogo ya vifaa, linalotoa uzoefu wa msingi wa PUBG kwa vifaa vyenye uwezo mdogo, huku likihifadhi burudani ya vita ya Battle Royale. Toleo la 2023 linajumuisha maboresho ya ramani, silaha, na modi za kucheza kwa kushirikiana zaidi.
+    </div>
+  </div>
+</div>
+<div class="post-actions">
+  <div class="actions-left">
+  <div class="action-item">
+  <i class="ri-heart-line like-button" data-post-id="postId1"></i>
+  <span class="count" id="like-count-postId1">0</span>
+</div>
+
+    <div class="action-item">
+      <i class="ri-message-2-line"></i>
+      <span class="count">3</span>
+    </div>
+  </div>
+  <div class="actions-right">
+    <div class="action-item">
+      <i class="ri-share-line"></i>
+       <span class="count">113k</span>
+    </div>
+  </div>
+</div>
+ </div>
+ 
+
+
+<div class="battle-card">
+
+<div class="timer">
+    <p>Match Will be On:</p>
+    <div class="countdown">12 Febr 2025 - 21:00 p.m</div>
+  </div>
+  <div style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="team" onclick="togglePopup('team1-popup')">
+      <img src="5.png" alt="Team 1">
+      <div class="team-name">Team Alpha</div>
+    </div>
+    <div class="vs">VS</div>
+    <div class="team" onclick="togglePopup('team2-popup')">
+      <img src="logo.png" alt="Team 2">
+      <div class="team-name">Team Beta</div>
+    </div>
+  </div>
+
+
+<div class="post-actions" style="margin-bottom: -20px">
+  <div class="actions-left">
+  <div class="action-item">
+  <i class="ri-heart-line like-button" data-post-id="postId1"></i>
+  <span class="count" id="like-count-postId1">0</span>
+</div>
+
+    <div class="action-item">
+      <i class="ri-message-2-line"></i>
+      <span class="count">3</span>
+    </div>
+  </div>
+  <div class="actions-right">
+    <div class="action-item">
+      <i class="ri-share-line"></i>
+       <span class="count">113k</span>
+    </div>
+  </div>
+</div>
+
+  <div id="team1-popup" class="popupi">
+    <button class="popupi-close-btn" onclick="togglePopup('team1-popup')"><i class="ri-close-line"></i></button>
+    <div class="profile-details">
+    <div class="profile-name">
+Team Alpha
+    </div>
+    <div class="post-time" style="line-height: 1.2;">
+Best Add more team info as needed Add more team info as needed Add more team info as needed 
+    </div>
+  </div>
+    <!-- Add more team info as needed -->
+  </div>
+
+  <div id="team2-popup" class="popupi">
+    <button class="close-btn" onclick="togglePopup('team2-popup')">&times;</button>
+    <h3>Team Beta Details</h3>
+    <p>Player 1: BetaBlazer</p>
+    <p>Player 2: SniperLord</p>
+    <!-- Add more team info as needed -->
+  </div>
+</div>
 
 
 
+ 
+ 
+      <div class="instagram-post-2">
+<div class="post-header">
+  <div class="profile-details">
+    <div class="profile-name">
+Admin 1.0
+    </div>
+    <div class="post-time" style="line-height: 1">
+Lorem ipsum <span class="username user-name"></span>username dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    </div>
+  </div>
+</div>
+<div class="post-actions">
+  <div class="actions-left">
+  <div class="action-item">
+  <i class="ri-heart-line like-button" data-post-id="postId1"></i>
+  <span class="count" id="like-count-postId1">0</span>
+</div>
+
+    <div class="action-item">
+      <i class="ri-message-2-line"></i>
+      <span class="count">3</span>
+    </div>
+  </div>
+  <div class="actions-right">
+    <div class="action-item">
+      <i class="ri-share-line"></i>
+       <span class="count">113k</span>
+    </div>
+  </div>
+</div>
+ </div>
+ 
+ 
+  <div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+0 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white" onclick="togglePopup('popup1')">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post2.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+   <span>New Version Pubg Mobile</span> 
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+    <div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+FREEFIRE
+    </div>
+    <div class="post-time">
+0 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <span>New Version pubg mobile</span> 
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+COD MOBILE
+    </div>
+    <div class="post-time">
+0 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+0 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+<div class="instagram-post-2">
+<div class="post-header">
+    <div class="profile-picture">
+        <img src="5.png" alt="User profile picture">
+      </div>
+  <div class="profile-details">
+    <div class="profile-name">
+PUBGM
+    </div>
+    <div class="post-time">
+0 Followers
+    </div>
+
+  </div>
+  <div class="post-options">
+<span class="follow-button" onclick="toggleFollow(this)">Follow</span>
+<span style="font-size: 14px;border-radius:6px;padding: 6px 9px;background-color:#3aafa9;color:white">Visit Now</span>
+  </div>
+</div>
+<div class="post-image">
+  <img src="post1.png" alt="Post content">
+  <div class="post-badges">
+    <span class="badge new"><strong>1#</strong></span>
+  </div>
+ <div class="bottom-left-icon" style="margin-right:10px">
+    <marquee>New Version pubg mobile gameplay na battles zitakujia hivi karibuni, efootball tournment pia inakujia hivi karibuni</marquee>
+</div>
+</div>
+
+<!--button class="join"  onclick='navigateTo("jisajili")'>Jiunge Sasa</button-->
+    </div>
+  </div>
+            <button class="close-btn" onclick="togglePopup('popup1')"><i class="ri-close-line"></i></button>
+        </div>
+    </div>
+
+    <div id="popup2" class="popup">
+        <div class="popup-content">
+            <h2>Popup 2</h2>
+            <button class="close-btn" onclick="togglePopup('popup2')">Close</button>
+        </div>
+    </div>
+
+    <div id="popup3" class="popup">
+        <div class="popup-content">
+            <h2>Popup 3</h2>
+            <button class="close-btn" onclick="togglePopup('popup3')">Close</button>
+        </div>
+    </div>
+
+    <div id="popup4" class="popup">
+        <div class="popup-content">
+            <h2>Popup 4</h2>
+            <button class="close-btn" onclick="togglePopup('popup4')">Close</button>
+        </div>
+    </div>
+
+    <div id="popup5" class="popup">
+        <div class="popup-content">
+            <h2>Popup 5</h2>
+            <button class="close-btn" onclick="togglePopup('popup5')">Close</button>
+        </div>
+    </div>
+<script>
+        function togglePopup(popupId) {
+            var popup = document.getElementById(popupId);
+            if (popup.classList.contains('show')) {
+                popup.classList.remove('show');
+                setTimeout(() => { popup.style.display = 'none'; }, 400); // Matches transition duration
+            } else {
+                popup.style.display = 'flex';
+                setTimeout(() => { popup.classList.add('show'); }, 10); // Small delay to trigger animation
+            }
+        }
+    </script>
 <script>
   function toggleFollow(button) {
     if (button.classList.contains('follow-button')) {
